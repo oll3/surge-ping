@@ -123,6 +123,9 @@ struct Opt {
     /// how many packets have been received.
     #[structopt(short = "t", long, default_value = "1")]
     timeout: u64,
+
+    #[structopt(long)]
+    ident: Option<u16>,
 }
 
 #[tokio::main]
@@ -148,7 +151,9 @@ async fn main() {
     let config = config_builder.build();
 
     let client = Client::new(&config).unwrap();
-    let mut pinger = client.pinger(ip, PingIdentifier(111)).await;
+    let mut pinger = client
+        .pinger(ip, PingIdentifier(opt.ident.unwrap_or(111)))
+        .await;
     pinger.timeout(Duration::from_secs(opt.timeout));
     let payload = vec![0; opt.size];
     let mut answer = Answer::new(&opt.host);
